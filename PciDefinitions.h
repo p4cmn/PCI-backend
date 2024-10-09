@@ -1,0 +1,13 @@
+#ifndef PCIDEFINITIONS_H
+#define PCIDEFINITIONS_H
+
+#define IOCTL_READ_PCI_CONFIG CTL_CODE(FILE_DEVICE_UNKNOWN, 0x800, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+typedef struct _PCIRequest {
+  ULONG Bus;
+  ULONG Slot;
+  ULONG Function;
+  ULONG Offset;
+} PCIRequest, *PPCIRequest;
+
+#endif // PCIDEFINITIONS_H

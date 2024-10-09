@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/pciDatabase">
+        <file>pci.ids</file>
+    </qresource>
+</RCC>
