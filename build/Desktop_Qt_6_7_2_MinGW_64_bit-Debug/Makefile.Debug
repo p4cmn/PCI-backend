@@ -15,7 +15,7 @@ CC            = gcc
 CXX           = g++
 DEFINES       = -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -fno-keep-inline-dllexport -g -Wall -Wextra -Wextra $(DEFINES)
-CXXFLAGS      = -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads $(DEFINES)
+CXXFLAGS      = -fno-keep-inline-dllexport -g -std=gnu++2a -Wall -Wextra -Wextra -fexceptions -mthreads $(DEFINES)
 INCPATH       = -I../../../PCI-backend -I. -ID:/OTHER/QT/6.7.2/mingw_64/include -ID:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork -ID:/OTHER/QT/6.7.2/mingw_64/include/QtCore -Idebug -ID:/OTHER/QT/6.7.2/mingw_64/mkspecs/win32-g++ 
 LINKER      =        g++
 LFLAGS        =        -Wl,-subsystem,console -mthreads
@@ -128,7 +128,7 @@ compiler_moc_predefs_make_all: debug/moc_predefs.h
 compiler_moc_predefs_clean:
 	-$(DEL_FILE) debug/moc_predefs.h
 debug/moc_predefs.h: D:/OTHER/QT/6.7.2/mingw_64/mkspecs/features/data/dummy.cpp
-	g++ -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -dM -E -o debug/moc_predefs.h D:/OTHER/QT/6.7.2/mingw_64/mkspecs/features/data/dummy.cpp
+	g++ -fno-keep-inline-dllexport -g -std=gnu++2a -Wall -Wextra -Wextra -dM -E -o debug/moc_predefs.h D:/OTHER/QT/6.7.2/mingw_64/mkspecs/features/data/dummy.cpp
 
 compiler_moc_header_make_all: debug/moc_tcpserver.cpp
 compiler_moc_header_clean:
@@ -256,6 +256,27 @@ debug/moc_tcpserver.cpp: ../../server/tcpserver.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork/qtcpsocket.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qvariant.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/q23utility.h \
+		../../controller/PciController.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonArray \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsonarray.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsonvalue.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qcborvalue.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qdatetime.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qcalendar.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qlocale.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qcborcommon.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qregularexpression.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qurl.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/quuid.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qendian.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonObject \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsonobject.h \
+		../../service/PciService.h \
+		../../model/PciDevice.h \
+		../../database/PciDatabase.h \
+		../../PciDefinitions.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonDocument \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsondocument.h \
 		debug/moc_predefs.h \
 		D:/OTHER/QT/6.7.2/mingw_64/bin/moc.exe
 	'D:\OTHER\QT\6.7.2\mingw_64\bin\moc.exe' $(DEFINES) --include D:/PROGRAMMING/C++/Qt/PCI-backend/build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/debug/moc_predefs.h -ID:/OTHER/QT/6.7.2/mingw_64/mkspecs/win32-g++ -ID:/PROGRAMMING/C++/Qt/PCI-backend -ID:/OTHER/QT/6.7.2/mingw_64/include -ID:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork -ID:/OTHER/QT/6.7.2/mingw_64/include/QtCore -I. -ID:/OTHER/QT/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -ID:/OTHER/QT/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -ID:/OTHER/QT/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -ID:/OTHER/QT/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -ID:/OTHER/QT/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -ID:/OTHER/QT/Tools/mingw1120_64/x86_64-w64-mingw32/include ../../server/tcpserver.h -o debug/moc_tcpserver.cpp
@@ -406,7 +427,38 @@ debug/main.o: ../../main.cpp D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QCoreAppl
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qpromise.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qvariant.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/q23utility.h \
-		../../PciDefinitions.h
+		../../server/TcpServer.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork/QTcpServer \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork/qtcpserver.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork/qtnetworkglobal.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork/qtnetwork-config.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork/qtnetworkexports.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork/qabstractsocket.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork/qhostaddress.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qiodevice.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork/QTcpSocket \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork/qtcpsocket.h \
+		../../controller/PciController.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonArray \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsonarray.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsonvalue.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qcborvalue.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qdatetime.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qcalendar.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qlocale.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qcborcommon.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qregularexpression.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qurl.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/quuid.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qendian.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonObject \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsonobject.h \
+		../../service/PciService.h \
+		../../model/PciDevice.h \
+		../../database/PciDatabase.h \
+		../../PciDefinitions.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonDocument \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsondocument.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/main.o ../../main.cpp
 
 debug/pcicontroller.o: ../../controller/pcicontroller.cpp ../../controller/PciController.h \
@@ -536,6 +588,10 @@ debug/pcicontroller.o: ../../controller/pcicontroller.cpp ../../controller/PciCo
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qendian.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonObject \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsonobject.h \
+		../../service/PciService.h \
+		../../model/PciDevice.h \
+		../../database/PciDatabase.h \
+		../../PciDefinitions.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonDocument \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsondocument.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/pcicontroller.o ../../controller/pcicontroller.cpp
@@ -547,6 +603,8 @@ debug/pcidevice.o: ../../model/pcidevice.cpp ../../model/PciDevice.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/pcidevice.o ../../model/pcidevice.cpp
 
 debug/pciservice.o: ../../service/pciservice.cpp ../../service/PciService.h \
+		../../model/PciDevice.h \
+		../../database/PciDatabase.h \
 		../../PciDefinitions.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/pciservice.o ../../service/pciservice.cpp
 
@@ -673,8 +731,9 @@ debug/tcpserver.o: ../../server/tcpserver.cpp ../../server/TcpServer.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtNetwork/qtcpsocket.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qvariant.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/q23utility.h \
-		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonDocument \
-		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsondocument.h \
+		../../controller/PciController.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonArray \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsonarray.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsonvalue.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qcborvalue.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qdatetime.h \
@@ -684,7 +743,15 @@ debug/tcpserver.o: ../../server/tcpserver.cpp ../../server/TcpServer.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qregularexpression.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qurl.h \
 		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/quuid.h \
-		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qendian.h
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qendian.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonObject \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsonobject.h \
+		../../service/PciService.h \
+		../../model/PciDevice.h \
+		../../database/PciDatabase.h \
+		../../PciDefinitions.h \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/QJsonDocument \
+		D:/OTHER/QT/6.7.2/mingw_64/include/QtCore/qjsondocument.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/tcpserver.o ../../server/tcpserver.cpp
 
 debug/qrc_resources.o: debug/qrc_resources.cpp 

@@ -14,16 +14,40 @@ vector<PciDevice> PciService::getPciDevices() const {
         if (vendorID == 0xFFFF) {
           continue;
         }
+        ULONG deviceID = (readPciConfig(bus, slot, function, 0x00) >> 16) & 0xFFFF;
+        if (deviceID == 0xFFFF) {
+          deviceID = 0xFFFFFFFF;
+        }
+        ULONG subVendorID = readPciConfig(bus, slot, function, 0x2C) & 0xFFFF;
+        if (subVendorID == 0xFFFF) {
+          subVendorID = 0xFFFFFFFF;
+        }
+        ULONG subDeviceID = (readPciConfig(bus, slot, function, 0x2C) >> 16) & 0xFFFF;
+        if (subDeviceID == 0xFFFF) {
+          subDeviceID = 0xFFFFFFFF;
+        }
+        ULONG classCode = (readPciConfig(bus, slot, function, 0x08) >> 24) & 0xFF;
+        if (classCode == 0xFF) {
+          classCode = 0xFFFFFFFF;
+        }
+        ULONG subclassCode = (readPciConfig(bus, slot, function, 0x08) >> 16) & 0xFF;
+        if (subclassCode == 0xFF) {
+          subclassCode = 0xFFFFFFFF;
+        }
+        ULONG progIf = (readPciConfig(bus, slot, function, 0x08) >> 8) & 0xFF;
+        if (progIf == 0xFF) {
+          progIf = 0xFFFFFFFF;
+        }
+        string vendorName = database.getVendorName(vendorID);
+        string deviceName = database.getDeviceName(vendorID, deviceID);
+        string subsystemName = database.getSubsystemName(vendorID, deviceID, subVendorID, subDeviceID);
+        string className = database.getClassName(classCode);
+        string subclassName = database.getSubClassName(classCode, subclassCode);
+        string progIfName = database.getProgIfName(classCode, progIf);
 
-	ULONG deviceID = (readPciConfig(bus, slot, function, 0x00) >> 16) & 0xFFFF;
-	ULONG subVendorID = readPciConfig(bus, slot, function, 0x2C) & 0xFFFF;
-	ULONG subDeviceID = (readPciConfig(bus, slot, function, 0x2C) >> 16) & 0xFFFF;
-
-	string vendorName = database.getVendorName(vendorID);
-	string deviceName = database.getDeviceName(vendorID, deviceID);
-	string subsystemName = database.getSubsystemName(vendorID, subVendorID, subDeviceID);
-
-	PciDevice device(bus, slot, function, vendorID, deviceID, subVendorID, subDeviceID, vendorName, deviceName, subsystemName);
+	PciDevice device(bus, slot, function, vendorID, deviceID, subVendorID, subDeviceID,
+			 classCode, subclassCode, progIf, vendorName, deviceName, subsystemName,
+			 className, subclassName, progIfName);
 	devices.push_back(device);
       }
     }

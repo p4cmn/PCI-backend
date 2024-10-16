@@ -11,7 +11,9 @@ class PciDevice {
 private:
   ULONG bus, slot, function;
   ULONG vendorId, deviceId, subVendorId, subDeviceId;
+  ULONG classCode, subclassCode, progIf;
   string vendorName, deviceName, subsystemName;
+  string className, subclassName, progIfName;
 
 public:
   PciDevice(ULONG bus,
@@ -21,9 +23,15 @@ public:
             ULONG deviceId,
             ULONG subVendorId,
             ULONG subDeviceId,
+            ULONG classCode,
+            ULONG subclassCode,
+            ULONG progIf,
             const string &vendorName = "N/A",
             const string &deviceName = "N/A",
-            const string &subsystemName = "N/A");
+            const string &subsystemName = "N/A",
+            const string &className = "N/A",
+            const string &subclassName = "N/A",
+            const string &progIfName = "N/A");
 
   // Геттеры
   ULONG getBus() const;
@@ -33,9 +41,15 @@ public:
   ULONG getDeviceId() const;
   ULONG getSubVendorId() const;
   ULONG getSubDeviceId() const;
+  ULONG getClassCode() const;
+  ULONG getSubClassCode() const;
+  ULONG getProgIf() const;
   string getVendorName() const;
   string getDeviceName() const;
   string getSubsystemName() const;
+  string getClassName() const;
+  string getSubClassName() const;
+  string getProgIfName() const;
 
   // Сеттеры
   void setBus(ULONG bus);
@@ -45,9 +59,15 @@ public:
   void setDeviceId(ULONG deviceId);
   void setSubVendorId(ULONG subVendorId);
   void setSubDeviceId(ULONG subDeviceId);
+  void setClassCode(ULONG classCode);
+  void setSubClassCode(ULONG subclassCode);
+  void setProgIf(ULONG progIf);
   void setVendorName(const string &vendorName);
   void setDeviceName(const string &deviceName);
   void setSubsystemName(const string &subsystemName);
+  void setClassName(const string &className);
+  void setSubClassName(const string &subclassName);
+  void setProgIfName(const string &progIfName);
 };
 
 #endif // PCIDEVICE_H

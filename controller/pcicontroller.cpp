@@ -24,6 +24,12 @@ QJsonDocument PciController::getPciDevicesJson() const {
     deviceJson["vendorName"] = QString::fromStdString(device.getVendorName());
     deviceJson["deviceName"] = QString::fromStdString(device.getDeviceName());
     deviceJson["subsystemName"] = QString::fromStdString(device.getSubsystemName());
+    deviceJson["classCode"] = static_cast<qint64>(device.getClassCode());
+    deviceJson["subClassCode"] = static_cast<qint64>(device.getSubClassCode());
+    deviceJson["progIf"] = static_cast<qint64>(device.getProgIf());
+    deviceJson["className"] = QString::fromStdString(device.getClassName());
+    deviceJson["subClassName"] = QString::fromStdString(device.getSubClassName());
+    deviceJson["progIfName"] = QString::fromStdString(device.getProgIfName());
     jsonDevices.append(deviceJson);
   }
 

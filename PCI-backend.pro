@@ -1,6 +1,6 @@
 QT = core network
 
-CONFIG += c++17 cmdline
+CONFIG += c++20 cmdline
 
 LIBS += -lkernel32
 

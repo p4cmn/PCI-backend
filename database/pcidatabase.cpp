@@ -1,179 +1,161 @@
-// #include <fstream>
-// #include <sstream>
-// #include <iostream>
-// #include "database/PciDatabase.h"
-
-// bool PciDatabase::loadFromFile(const string &filePath) {
-//   using namespace std;
-//   ifstream file(filePath);
-//   if (!file.is_open()) {
-//     cerr << "Unable to open pci.ids file." << endl;
-//     return false;
-//   }
-
-//   string line;
-//   ULONG currentVendorID = 0;
-
-//   while (getline(file, line)) {
-//     if (line.empty() || line[0] == '#') {
-//       continue;
-//     }
-//     if (line[0] != '\t') {
-//       istringstream ss(line);
-//       ss >> hex >> currentVendorID;
-//       string vendorName;
-//       getline(ss, vendorName);
-//       vendorName.erase(0, vendorName.find_first_not_of(" \t"));
-//       vendorMap[currentVendorID] = vendorName;
-//     } else if (line[1] != '\t') {
-//       istringstream ss(line.substr(1));
-//       ULONG deviceID;
-//       ss >> hex >> deviceID;
-//       string deviceName;
-//       getline(ss, deviceName);
-//       deviceName.erase(0, deviceName.find_first_not_of(" \t"));
-//       deviceMap[{currentVendorID, deviceID}] = deviceName;
-//     } else {
-//       istringstream ss(line.substr(2));
-//       ULONG subVendorID, subDeviceID;
-//       ss >> hex >> subVendorID >> subDeviceID;
-//       string subsystemName;
-//       getline(ss, subsystemName);
-//       subsystemName.erase(0, subsystemName.find_first_not_of(" \t"));
-//       subsystemMap[{currentVendorID, subVendorID, subDeviceID}] = subsystemName;
-//     }
-//   }
-//   return true;
-// }
-
-// std::string PciDatabase::getVendorName(ULONG vendorId) const {
-//   auto it = vendorMap.find(vendorId);
-//   return it != vendorMap.end() ? it->second : "N/A";
-// }
-
-// std::string PciDatabase::getDeviceName(ULONG vendorId, ULONG deviceId) const {
-//   auto it = deviceMap.find({vendorId, deviceId});
-//   return it != deviceMap.end() ? it->second : "N/A";
-// }
-
-// std::string PciDatabase::getSubsystemName(ULONG vendorId, ULONG subVendorId, ULONG subDeviceId) const {
-//   auto it = subsystemMap.find({vendorId, subVendorId, subDeviceId});
-//   return it != subsystemMap.end() ? it->second : "N/A";
-// }
-
-
-#include "database/PciDatabase.h"
+#include "PciDatabase.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <thread>
 #include <vector>
 #include <mutex>
 
-std::mutex mapMutex; // Мьютекс для защиты доступа к общим ресурсам
+void PciDatabase::parseVendor(const std::string& line, ULONG& currentVendorID) {
+  std::istringstream ss(line);
+  ss >> std::hex >> currentVendorID;
+  std::string vendorName;
+  std::getline(ss, vendorName);
+  vendorName.erase(0, vendorName.find_first_not_of(" \t"));
+  vendorMap[currentVendorID] = vendorName;
+}
 
-// Функция для парсинга части файла
-void parseFileChunk(const std::vector<std::string> &lines,
-		    ULONG &currentVendorID,
-		    map<ULONG, std::string> &localVendorMap,
-		    map<std::pair<ULONG, ULONG>, std::string> &localDeviceMap,
-		    map<std::tuple<ULONG, ULONG, ULONG>, std::string> &localSubsystemMap) {
+void PciDatabase::parseDevice(const std::string& line, ULONG currentVendorID, ULONG& currentDeviceID) {
+  std::istringstream ss(line.substr(1));
+  ULONG deviceID;
+  ss >> std::hex >> deviceID;
+  std::string deviceName;
+  std::getline(ss, deviceName);
+  deviceName.erase(0, deviceName.find_first_not_of(" \t"));
+  deviceMap[{currentVendorID, deviceID}] = deviceName;
+  currentDeviceID = deviceID;  // Запоминаем deviceID для subsystem
+}
 
-  for (const auto &line : lines) {
+void PciDatabase::parseClass(const std::string& line, ULONG& currentClassID) {
+  std::istringstream ss(line.substr(1));
+  ss >> std::hex >> currentClassID;
+  std::string className;
+  std::getline(ss, className);
+  className.erase(0, className.find_first_not_of(" \t"));
+  classMap[currentClassID] = className;
+}
+
+void PciDatabase::parseSubClass(const std::string& line, ULONG currentClassID, ULONG& currentSubClassID) {
+  std::istringstream ss(line.substr(1));
+  ULONG subClassID;
+  ss >> std::hex >> subClassID;
+  std::string subClassName;
+  std::getline(ss, subClassName);
+  subClassName.erase(0, subClassName.find_first_not_of(" \t"));
+  subclassMap[{currentClassID, subClassID}] = subClassName;
+  currentSubClassID = subClassID;  // Запоминаем для progIf
+}
+
+
+void PciDatabase::parseProgIf(const std::string& line, ULONG currentSubClassID) {
+  std::istringstream ss(line.substr(2));
+  ULONG progIfID;
+  ss >> std::hex >> progIfID;
+  std::string progIfName;
+  std::getline(ss, progIfName);
+  progIfName.erase(0, progIfName.find_first_not_of(" \t"));
+  progIfMap[{currentSubClassID, progIfID}] = progIfName;
+}
+
+
+void PciDatabase::parseSubsystem(const std::string& line, ULONG currentVendorID, ULONG currentDeviceID) {
+  std::istringstream ss(line.substr(2));
+  ULONG subVendorID, subDeviceID;
+  ss >> std::hex >> subVendorID >> subDeviceID;
+  std::string subsystemName;
+  std::getline(ss, subsystemName);
+  subsystemName.erase(0, subsystemName.find_first_not_of(" \t"));
+  subsystemMap[{currentVendorID, currentDeviceID, subVendorID, subDeviceID}] = subsystemName;
+}
+
+void PciDatabase::parseFileChunk(const std::vector<std::string>& lines, ULONG& currentVendorID) {
+  ULONG currentClassID = 0;
+  ULONG currentDeviceID = 0;
+  ULONG currentSubClassID = 0;
+  for (const auto& line : lines) {
     if (line.empty() || line[0] == '#') {
       continue;
     }
     if (line[0] != '\t') {
-      std::istringstream ss(line);
-      ss >> std::hex >> currentVendorID;
-      std::string vendorName;
-      std::getline(ss, vendorName);
-      vendorName.erase(0, vendorName.find_first_not_of(" \t"));
-      localVendorMap[currentVendorID] = vendorName;
+      if (line[0] == 'C') {
+        parseClass(line, currentClassID);
+      } else {
+        parseVendor(line, currentVendorID);
+        currentDeviceID = 0;
+      }
     } else if (line[1] != '\t') {
-      std::istringstream ss(line.substr(1));
-      ULONG deviceID;
-      ss >> std::hex >> deviceID;
-      std::string deviceName;
-      std::getline(ss, deviceName);
-      deviceName.erase(0, deviceName.find_first_not_of(" \t"));
-      localDeviceMap[{currentVendorID, deviceID}] = deviceName;
+      if (currentClassID > 0) {
+        parseSubClass(line, currentClassID, currentSubClassID);
+      } else {
+        parseDevice(line, currentVendorID, currentDeviceID);
+      }
     } else {
-      std::istringstream ss(line.substr(2));
-      ULONG subVendorID, subDeviceID;
-      ss >> std::hex >> subVendorID >> subDeviceID;
-      std::string subsystemName;
-      std::getline(ss, subsystemName);
-      subsystemName.erase(0, subsystemName.find_first_not_of(" \t"));
-      localSubsystemMap[{currentVendorID, subVendorID, subDeviceID}] = subsystemName;
+      if (currentClassID > 0) {
+        parseProgIf(line, currentSubClassID);
+      } else if (currentDeviceID > 0) {
+        parseSubsystem(line, currentVendorID, currentDeviceID);
+      }
     }
   }
 }
 
-bool PciDatabase::loadFromFile(const std::string &filePath) {
+bool PciDatabase::loadFromFile(const std::string& filePath) {
   std::ifstream file(filePath);
   if (!file.is_open()) {
     std::cerr << "Unable to open pci.ids file." << std::endl;
     return false;
   }
 
-  // Чтение всех строк из файла
   std::vector<std::string> lines;
   std::string line;
   while (std::getline(file, line)) {
-    if (line.length() > 10000) { // Проверка на слишком длинную строку
-      std::cerr << "Line too long, skipping: " << line.length() << " characters." << std::endl;
-      continue;
-    }
     lines.push_back(line);
   }
   file.close();
 
   if (lines.empty()) {
-    std::cout << "File is empty or could not be read." << std::endl;
+    std::cerr << "File is empty or could not be read." << std::endl;
     return false;
   }
 
-  std::cout << "File loaded successfully, total lines: " << lines.size() << std::endl;
-
-  // Обработка всего файла в одном потоке (пока для отладки)
-  map<ULONG, std::string> localVendorMap;
-  map<std::pair<ULONG, ULONG>, std::string> localDeviceMap;
-  map<std::tuple<ULONG, ULONG, ULONG>, std::string> localSubsystemMap;
   ULONG currentVendorID = 0;
-
-  try {
-    parseFileChunk(lines, currentVendorID, localVendorMap, localDeviceMap, localSubsystemMap);
-  } catch (const std::exception &ex) {
-    std::cerr << "Exception during parsing: " << ex.what() << std::endl;
-    return false;
-  }
-
-  // Перенос локальных карт в общие карты
-  {
-    std::lock_guard<std::mutex> lock(mapMutex);
-    vendorMap.insert(localVendorMap.begin(), localVendorMap.end());
-    deviceMap.insert(localDeviceMap.begin(), localDeviceMap.end());
-    subsystemMap.insert(localSubsystemMap.begin(), localSubsystemMap.end());
-  }
+  parseFileChunk(lines, currentVendorID);
 
   std::cout << "PCI database loaded successfully." << std::endl;
   return true;
 }
 
-
 std::string PciDatabase::getVendorName(ULONG vendorId) const {
+  std::lock_guard<std::mutex> lock(mapMutex);
   auto it = vendorMap.find(vendorId);
   return it != vendorMap.end() ? it->second : "N/A";
 }
 
 std::string PciDatabase::getDeviceName(ULONG vendorId, ULONG deviceId) const {
+  std::lock_guard<std::mutex> lock(mapMutex);
   auto it = deviceMap.find({vendorId, deviceId});
   return it != deviceMap.end() ? it->second : "N/A";
 }
 
-std::string PciDatabase::getSubsystemName(ULONG vendorId, ULONG subVendorId, ULONG subDeviceId) const {
-  auto it = subsystemMap.find({vendorId, subVendorId, subDeviceId});
+std::string PciDatabase::getSubsystemName(ULONG vendorId, ULONG deviceId, ULONG subVendorId, ULONG subDeviceId) const {
+  std::lock_guard<std::mutex> lock(mapMutex);
+  auto it = subsystemMap.find({vendorId, deviceId, subVendorId, subDeviceId});
   return it != subsystemMap.end() ? it->second : "N/A";
 }
 
+std::string PciDatabase::getClassName(ULONG classCode) const {
+  std::lock_guard<std::mutex> lock(mapMutex);
+  auto it = classMap.find(classCode);
+  return it != classMap.end() ? it->second : "N/A";
+}
+
+std::string PciDatabase::getSubClassName(ULONG classCode, ULONG subClassCode) const {
+  std::lock_guard<std::mutex> lock(mapMutex);
+  auto it = subclassMap.find({classCode, subClassCode});
+  return it != subclassMap.end() ? it->second : "N/A";
+}
+
+std::string PciDatabase::getProgIfName(ULONG classCode, ULONG progIfCode) const {
+  std::lock_guard<std::mutex> lock(mapMutex);
+  auto it = progIfMap.find({classCode, progIfCode});
+  return it != progIfMap.end() ? it->second : "N/A";
+}
