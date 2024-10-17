@@ -6,7 +6,6 @@ PciService::PciService(HANDLE hDevice, const PciDatabase &database)
 
 vector<PciDevice> PciService::getPciDevices() const {
   vector<PciDevice> devices;
-
   for (ULONG bus = 0; bus < 256; ++bus) {
     for (ULONG slot = 0; slot < 32; ++slot) {
       for (ULONG function = 0; function < 8; ++function) {
@@ -43,7 +42,7 @@ vector<PciDevice> PciService::getPciDevices() const {
         string subsystemName = database.getSubsystemName(vendorID, deviceID, subVendorID, subDeviceID);
         string className = database.getClassName(classCode);
         string subclassName = database.getSubClassName(classCode, subclassCode);
-        string progIfName = database.getProgIfName(classCode, progIf);
+        string progIfName = database.getProgIfName(classCode, subclassCode, progIf);
 
 	PciDevice device(bus, slot, function, vendorID, deviceID, subVendorID, subDeviceID,
 			 classCode, subclassCode, progIf, vendorName, deviceName, subsystemName,

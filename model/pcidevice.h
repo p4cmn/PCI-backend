@@ -33,7 +33,6 @@ public:
             const string &subclassName = "N/A",
             const string &progIfName = "N/A");
 
-  // Геттеры
   ULONG getBus() const;
   ULONG getSlot() const;
   ULONG getFunction() const;
@@ -51,7 +50,6 @@ public:
   string getSubClassName() const;
   string getProgIfName() const;
 
-  // Сеттеры
   void setBus(ULONG bus);
   void setSlot(ULONG slot);
   void setFunction(ULONG function);

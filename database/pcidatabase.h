@@ -12,6 +12,8 @@ using std::map;
 using std::pair;
 using std::string;
 using std::tuple;
+using std::vector;
+using std::mutex;
 
 class PciDatabase {
 private:
@@ -19,19 +21,27 @@ private:
   map<pair<ULONG, ULONG>, string> deviceMap;
   map<tuple<ULONG, ULONG, ULONG, ULONG>, string> subsystemMap;
   map<ULONG, string> classMap;
-  map<pair<ULONG, ULONG>, string> subclassMap;
-  map<pair<ULONG, ULONG>, string> progIfMap;
+  map<tuple<ULONG, ULONG>, string> subclassMap;
+  map<tuple<ULONG, ULONG, ULONG>, string> progIfMap;
 
-  mutable std::mutex mapMutex;
+  mutable mutex mapMutex;
 
-  void parseFileChunk(const std::vector<std::string>& lines, ULONG& currentVendorID);
+  vector<vector<string>> splitFileIntoBlocks(const vector<string>& lines);
 
-  void parseVendor(const std::string& line, ULONG& currentVendorID);
-  void parseDevice(const std::string& line, ULONG currentVendorID, ULONG& currentDeviceID);
-  void parseClass(const std::string& line, ULONG& currentClassID);
-  void parseSubClass(const std::string& line, ULONG currentClassID, ULONG& currentSubClassID);
-  void parseProgIf(const std::string& line, ULONG currentSubClassID);
-  void parseSubsystem(const std::string& line, ULONG currentVendorID, ULONG currentDeviceID);
+  void parseFileChunk(const vector<string>& lines, ULONG& currentVendorID,
+                      map<ULONG, string>& localVendorMap,
+                      map<pair<ULONG, ULONG>, string>& localDeviceMap,
+                      map<tuple<ULONG, ULONG, ULONG, ULONG>, string>& localSubsystemMap,
+                      map<ULONG, string>& localClassMap,
+                      map<tuple<ULONG, ULONG>, string>& localSubClassMap,
+                      map<tuple<ULONG, ULONG, ULONG>, string>& localProgIfMap);
+
+  void parseVendor(const string& line, ULONG& currentVendorID, map<ULONG, string>& localVendorMap);
+  void parseDevice(const string& line, ULONG currentVendorID, ULONG& currentDeviceID, map<pair<ULONG, ULONG>, string>& localDeviceMap);
+  void parseClass(const string& line, ULONG& currentClassID, map<ULONG, string>& localClassMap);
+  void parseSubClass(const string& line, ULONG currentClassID, ULONG& currentSubClassID, map<tuple<ULONG, ULONG>, string>& localSubClassMap);
+  void parseProgIf(const string& line, ULONG currentClassID, ULONG currentSubClassID, map<tuple<ULONG, ULONG, ULONG>, string>& localProgIfMap);
+  void parseSubsystem(const string& line, ULONG currentVendorID, ULONG currentDeviceID, map<tuple<ULONG, ULONG, ULONG, ULONG>, string>& localSubsystemMap);
 
 public:
   bool loadFromFile(const string& filePath);
@@ -41,7 +51,7 @@ public:
   string getSubsystemName(ULONG vendorId, ULONG deviceId, ULONG subVendorId, ULONG subDeviceId) const;
   string getClassName(ULONG classCode) const;
   string getSubClassName(ULONG classCode, ULONG subClassCode) const;
-  string getProgIfName(ULONG classCode, ULONG progIfCode) const;
+  string getProgIfName(ULONG classCode, ULONG subClassCode, ULONG progIfCode) const;
 };
 
 #endif // PCIDATABASE_H

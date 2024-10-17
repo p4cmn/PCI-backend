@@ -33,7 +33,6 @@ PciDevice::PciDevice(ULONG bus,
     subclassName(subclassName),
     progIfName(progIfName){}
 
-// Геттеры
 ULONG PciDevice::getBus() const { return bus; }
 ULONG PciDevice::getSlot() const { return slot; }
 ULONG PciDevice::getFunction() const { return function; }
@@ -51,7 +50,6 @@ string PciDevice::getClassName() const { return className; }
 string PciDevice::getSubClassName() const { return subclassName; }
 string PciDevice::getProgIfName() const { return progIfName; }
 
-// Сеттеры
 void PciDevice::setBus(ULONG bus) { this->bus = bus; }
 void PciDevice::setSlot(ULONG slot) { this->slot = slot; }
 void PciDevice::setFunction(ULONG function) { this->function = function; }
